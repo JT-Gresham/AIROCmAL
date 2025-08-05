@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+source /etc/AIROCmAL/AIROCmAL_path
+aiinaalpkg=OmniGen
+
+AIROCmAL_update_OmniGen () {
+  cd $AIROCmALdir/$aiinaalpkg
+  git fetch --all
+  git branch backup-master
+  git reset --hard origin/master
+  git pull
+  rm ./libref-$aiinaalpkg*
+  rm ./requirements_$aiinaalpkg*
+  wget https://raw.githubusercontent.com/JT-Gresham/AIROCmAL/main/OmniGen/libref-$aiinaalpkg
+  wget https://raw.githubusercontent.com/JT-Gresham/AIROCmAL/main/OmniGen/user_customize_$aiinaalpkg_example.sh
+  wget https://raw.githubusercontent.com/JT-Gresham/AIROCmAL/main/OmniGen/requirements_$aiinaalpkg.txt
+  AIROCmAL update Torch
+  pip install -r requirements_$aiinaalpkg.txt
+  AIROCmAL update Intel
+  cd $aiinaalpkg
+  if grep -Fxq "import intel_extension_for_pytorch as ipex" pipeline.py
+    then
+      echo "Intel extensions found in pipeline.py...skipping"
+    else
+      sed -i 's|import torch|import torch\nimport intel_extension_for_pytorch as ipex|g' pipeline.py
+  fi
+  if grep -Fxq "else 'xpu'" pipeline.py
+    then
+      echo "Device set to XPU in pipeline.py...skipping"
+    else
+      sed -i 's|else \x27cpu\x27|else \x27xpu\x27|g' pipeline.py
+  fi
+  if grep -Fxq "import intel_extension_for_pytorch as ipex" model.py
+    then
+      echo "Intel extensions found in model.py...skipping"
+    else
+      sed -i 's|import torch.nn as nn|import torch.nn as nn\nimport intel_extension_for_pytorch as ipex|g' model.py
+  fi
+  if grep -Fxq "import intel_extension_for_pytorch as ipex" transformer.py
+    then
+      echo "Intel extensions found in transformer.py...skipping"
+    else
+      sed -i 's|import torch.utils.checkpoint|import torch.utils.checkpoint\nimport intel_extension_for_pytorch as ipex\nimport intel_extension_for_transformers|g' transformer.py
+  fi
+  if grep -Fxq "import intel_extension_for_pytorch as ipex" scheduler.py
+    then
+      echo "Intel extensions found in scheduler.py...skipping"
+    else
+      sed -i 's|import torch|import torch\nimport intel_extension_for_pytorch as ipex\nimport intel_extension_for_transformers|g' scheduler.py
+  fi
+  if grep -Fxq "import intel_extension_for_pytorch as ipex" utils.py
+    then
+      echo "Intel extensions found in utils.py...skipping"
+    else
+      sed -i 's|import torch|import torch\nimport intel_extension_for_pytorch as ipex\nimport intel_extension_for_transformers|g' utils.py
+  fi
+  if grep -Fxq "import intel_extension_for_pytorch as ipex" processor.py
+    then
+      echo "Intel extensions found in processor.py...skipping"
+    else
+      sed -i 's|import torch|import torch\nimport intel_extension_for_pytorch as ipex\nimport intel_extension_for_transformers|g' processor.py
+  fi
+#rm -R "$AIROCmALdir/$aiinaalpkg/MyOmniGenProjects"
+#rm -R "$AIROCmALdir/$aiinaalpkg/models/loras"
+#rm -R "$AIROCmALdir/$aiinaalpkg/wildcards"
+#rm -R "$AIROCmALdir/$aiinaalpkg/sdxl_styles"
+#rm -R "$AIROCmALdir/$aiinaalpkg/models/vae"
+#rm -R "$AIROCmALdir/$aiinaalpkg/models/vae_approx"
+#ln -sf "$AIROCmALdir/shared/MyOmniGenProjects" "$AIROCmALdir/$aiinaalpkg/MyOmniGenProjects"
+#ln -sf "$AIROCmALdir/shared/loras/t2i" "$AIROCmALdir/$aiinaalpkg/models/loras"
+#ln -sf "$AIROCmALdir/shared/wildcards/Fooocus" "$AIROCmALdir/$aiinaalpkg/wildcards"
+#ln -sf "$AIROCmALdir/shared/sdxl_styles/Fooocus" "$AIROCmALdir/$aiinaalpkg/sdxl_styles"
+#ln -sf "$AIROCmALdir/shared/VAEs/t2i/vae/" "$AIROCmALdir/$aiinaalpkg/models/vae"
+#ln -sf "$AIROCmALdir/shared/VAEs/t2i/vae_approx/" "$AIROCmALdir/$aiinaalpkg/models/vae_approx"
+cd $pdirectory
+$AIROCmALdir/$aiinaalpkg/user_customize_$aiinaalpkg.sh
+cd $AIROCmALdir/$aiinaalpkg
+}
+
+OmniGen-exit () {
+    kill $(pidof python $AIROCmALdir/$aiinaalpkg)
+}

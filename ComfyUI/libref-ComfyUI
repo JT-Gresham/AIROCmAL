@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+source /etc/AIROCmAL/AIROCmAL_path
+source $AIROCmALdir/AIROCmAL_env/bin/ipex-llm-init -g --device Arc
+aiinaalpkg=ComfyUI
+
+AIROCmAL_update_ComfyUI () {
+  cd $AIROCmALdir/$aiinaalpkg
+  git fetch --all
+  git branch backup-master
+  git reset --hard origin/master
+  git pull
+  rm ./libref-$aiinaalpkg*
+  rm ./requirements_$aiinaalpkg*
+  wget https://raw.githubusercontent.com/JT-Gresham/AIROCmAL/main/ComfyUI/libref-$aiinaalpkg
+  wget https://raw.githubusercontent.com/JT-Gresham/AIROCmAL/main/ComfyUI/user_customize_$aiinaalpkg_example.sh
+  wget https://raw.githubusercontent.com/JT-Gresham/AIROCmAL/main/ComfyUI/requirements_$aiinaalpkg.txt
+  AIROCmAL update Torch
+  pip install --upgrade -r requirements_$aiinaalpkg.txt
+  AIROCmAL update Intel
+#  if grep -Fxq "import intel_extension_for_pytorch as ipex" main.py
+#    then
+#      echo "Intel extensions found in launch.py...skipping"
+#    else
+#      sed -i 's|import logging|import logging\n\nimport torch\nimport intel_extension_for_pytorch as ipex\nimport intel_extension_for_transformers\nimport openvino\n|g' main.py
+#  fi
+#  cd $AIROCmALdir/shared/configs/ComfyUI/custom_nodes/comfyui-manager
+#  if grep -Fxq "import intel_extension_for_pytorch as ipex" prestartup_script.py
+#    then
+#      echo "Intel extensions found in prestartup_script.py...skipping"
+#    else
+#      sed -i 's|import folder_paths|import folder_paths\n\nimport torch\nimport intel_extension_for_pytorch as ipex\nimport intel_extension_for_transformers\nimport openvino\n|g' prestartup_script.py
+#  fi
+
+  cd $AIROCmALdir/$aiinaalpkg
+  rm -R "$AIROCmALdir/$aiinaalpkg/models/checkpoints"
+  rm -R "$AIROCmALdir/$aiinaalpkg/models/loras"
+  rm -R "$AIROCmALdir/$aiinaalpkg/models/clip_vision"
+  rm -R "$AIROCmALdir/$aiinaalpkg/models/controlnet"
+  rm -R "$AIROCmALdir/$aiinaalpkg/wildcards"
+  rm -R "$AIROCmALdir/$aiinaalpkg/user"
+  rm -R "$AIROCmALdir/$aiinaalpkg/custom_nodes"
+  rm -R "$AIROCmALdir/$aiinaalpkg/models/vae"
+  rm -R "$AIROCmALdir/$aiinaalpkg/models/vae_approx"
+  rm -R "$AIROCmALdir/$aiinaalpkg/models/upscale_models"
+  rm -R "$AIROCmALdir/$aiinaalpkg/models/sams"
+  rm -R "$AIROCmALdir/$aiinaalpkg/models/ultralytics"
+  rm -R "$AIROCmALdir/$aiinaalpkg/output"
+  rm custom_nodes/comfyui-manager/pip_overrides.json
+  ln -sf "$AIROCmALdir/shared/checkpoints/t2i" "$AIROCmALdir/$aiinaalpkg/models/checkpoints"
+  ln -sf "$AIROCmALdir/shared/loras/t2i" "$AIROCmALdir/$aiinaalpkg/models/loras"
+  ln -sf "$AIROCmALdir/shared/clip_vision" "$AIROCmALdir/$aiinaalpkg/models/clip_vision"
+  ln -sf "$AIROCmALdir/shared/controlnet" "$AIROCmALdir/$aiinaalpkg/models/controlnet"
+  ln -sf "$AIROCmALdir/shared/wildcards/" "$AIROCmALdir/$aiinaalpkg/wildcards"
+  mkdir "$AIROCmALdir/$aiinaalpkg/user"
+  ln -sf "$AIROCmALdir/shared/configs/$aiinaalpkg/user/" "$AIROCmALdir/$aiinaalpkg/user/default"
+  ln -sf "$AIROCmALdir/shared/configs/$aiinaalpkg/custom_nodes/" "$AIROCmALdir/$aiinaalpkg/custom_nodes"
+  ln -sf "$AIROCmALdir/shared/VAEs/t2i/vae/" "$AIROCmALdir/$aiinaalpkg/models/vae"
+  ln -sf "$AIROCmALdir/shared/VAEs/t2i/vae_approx/" "$AIROCmALdir/$aiinaalpkg/models/vae_approx"
+  ln -sf "$AIROCmALdir/shared/upscale_models/" "$AIROCmALdir/$aiinaalpkg/models/upscale_models"
+  ln -sf "$AIROCmALdir/shared/configs/$aiinaalpkg/sams/" "$AIROCmALdir/$aiinaalpkg/models/sams"
+  ln -sf "$AIROCmALdir/shared/configs/$aiinaalpkg/ultralytics" "$AIROCmALdir/$aiinaalpkg/models/ultralytics"
+  ln -sf "$AIROCmALdir/shared/output/ComfyUI/" "$AIROCmALdir/$aiinaalpkg/output"
+# OmniGen2 Setup #
+# FIRST You need to manually download the model, text encoder, and vae files from: "https://huggingface.co/Comfy-Org/Omnigen2_ComfyUI_repackaged/tree/main/split_files"
+  rm -R "$AIROCmALdir/$aiinaalpkg/models/diffusion_models"
+  rm -R "$AIROCmALdir/$aiinaalpkg/models/text_encoders"
+  ln -sf "$AIROCmALdir/shared/diffusion_models/" "$AIROCmALdir/$aiinaalpkg/models/diffusion_models"
+  ln -sf "$AIROCmALdir/shared/text_encoders/" "$AIROCmALdir/$aiinaalpkg/models/text_encoders"  
+###################
+  cp -f $AIROCmALdir/Scripts/pip_overrides.json $AIROCmALdir/$aiinaalpkg/custom_nodes/comfyui-manager/
+  cd $pdirectory
+  $AIROCmALdir/$aiinaalpkg/user_customize_"$aiinaalpkg".sh
+  cd $AIROCmALdir/$aiinaalpkg
+}
+
+ComfyUI-exit () {
+    kill $(pidof python $AIROCmALdir/$aiinaalpkg)
+}

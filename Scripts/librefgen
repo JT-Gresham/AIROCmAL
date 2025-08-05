@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+source /etc/AIROCmAL/AIROCmAL_path
+
+echo "Running librefgen..."
+cd $AIROCmALdir
+echo "Regenerating LIBREF..."
+echo "pdirectory=$pdirectory" > $AIROCmALdir/libref
+echo "AIROCmALdir=$AIROCmALdir" >> $AIROCmALdir/libref
+echo "" >> $AIROCmALdir/libref
+echo "export LD_LIBRARY_PATH=/lib" >> $AIROCmALdir/libref
+#echo "export LLM_DIR=$AIROCmALdir_env/lib/python3.11/site-packages/intel_extension_for_pytorch/llm" >> $AIROCmALdir/libref
+#echo "rm \"$AIROCmALdir/AIROCmAL_env/lib/python3.11/site-packages/ipex_llm\"" >> $AIROCmALdir/libref
+#echo "ln -sf \"$AIROCmALdir_env/lib/python3.11/site-packages/intel_extension_for_pytorch/llm/\" \"$AIROCmALdir/AIROCmAL_env/lib/python3.11/site-packages/ipex_llm\"" >> $AIROCmALdir/libref
+#echo "export LLM_DIR=$AIROCmALdir/AIROCmAL_env/lib/python3.11/site-packages/ipex_llm" >> $AIROCmALdir/libref
+echo "export USE_XETLA=OFF" >> $AIROCmALdir/libref
+echo "export SYCL_PI_LEVEL_ZERO_USE_IMMEDIATE_COMMANDLISTS=1" >> $AIROCmALdir/libref
+echo "export SYCL_CACHE_PERSISTENT=1" >> $AIROCmALdir/libref
+echo "source /opt/intel/oneapi/setvars.sh" >> $AIROCmALdir/libref
+#echo "source $pdirectory/AIROCmAL/AIROCmAL_env/bin/ipex-llm-init -g --device Arc" >> $AIROCmALdir/libref
+
+echo "AIROCmAL_update () {" >> $AIROCmALdir/libref
+echo "    hfcache=$(echo ~)/.cache/huggingface" >> $AIROCmALdir/libref
+echo "    cd $AIROCmALdir" >> $AIROCmALdir/libref
+echo "    git switch main" >> $AIROCmALdir/libref
+echo "    git reset --hard HEAD" >> $AIROCmALdir/libref
+echo "    git pull" >> $AIROCmALdir/libref
+echo "    rm -Rf $AIROCmALdir/AIROCmAL_env/lib/python3.11/site-packages/~*" >> $AIROCmALdir/libref
+echo "    rm -Rf $AIROCmALdir/AIROCmAL_env_inf/lib/python3.11/site-packages/~*" >> $AIROCmALdir/libref
+echo "    sed -i 's/\r//' $AIROCmALdir/AIROCmAL_install.sh 2> /dev/null" >> $AIROCmALdir/libref
+echo "    cd $AIROCmALdir/Scripts" >> $AIROCmALdir/libref
+echo "    for file in *.sh" >> $AIROCmALdir/libref
+echo "      do" >> $AIROCmALdir/libref
+echo "      sed -i 's/\r//' \$file" 2> /dev/null >> $AIROCmALdir/libref
+echo "    done" >> $AIROCmALdir/libref
+echo "    cd \$AIROCmALdir" >> $AIROCmALdir/libref
+echo "    for d in */" >> $AIROCmALdir/libref
+echo "      do" >> $AIROCmALdir/libref
+echo "      aiinaalpkg1=\$(echo \$d | cut -d/ -f1)" >> $AIROCmALdir/libref 
+echo "      sed -i 's/\r//' \$aiinaalpkg1/libref-\$aiinaalpkg1 2> /dev/null" >> $AIROCmALdir/libref
+echo "    done" >> $AIROCmALdir/libref
+echo "    Scripts/librefgen" >> $AIROCmALdir/libref
+echo "    pip install --upgrade pip" >> $AIROCmALdir/libref
+echo "    rm -R \"\$hfcache\"" >> $AIROCmALdir/libref
+echo "    ln -sf \"$AIROCmALdir/shared/HF\" \"\$hfcache\"" >> $AIROCmALdir/libref
+######## Removed Intel update function call due to split environments. This must now be done in the AIROCmAL package updater.
+#echo "    AIROCmAL_update_Intel" >> $AIROCmALdir/libref
+echo "}" >> $AIROCmALdir/libref
+
+echo "AIROCmAL_update_Intel () {" >> $AIROCmALdir/libref
+echo "    pip install --upgrade -r $AIROCmALdir/Scripts/intel_requirements.txt" >> $AIROCmALdir/libref
+echo "}" >> $AIROCmALdir/libref
+
+echo "AIROCmAL_update_Intel_inf () {" >> $AIROCmALdir/libref
+echo "    pip install --upgrade -r $AIROCmALdir/Scripts/intel_requirements_inf.txt" >> $AIROCmALdir/libref
+echo "}" >> $AIROCmALdir/libref
+
+echo "EOF_fix () {" >> $AIROCmALdir/libref
+echo "echo    Correcting any BS WINBLOWS carriage return entries in bash scripts..." >> $AIROCmALdir/libref
+echo "    cd $AIROCmALdir/\$aiinaalpkg" >> $AIROCmALdir/libref
+echo "    for file in libref-*" >> $AIROCmALdir/libref
+echo "      do" >> $AIROCmALdir/libref
+echo "      sed -i 's/\r//' \$file 2> /dev/null" >> $AIROCmALdir/libref
+echo "    done" >> $AIROCmALdir/libref
+echo "}" >> $AIROCmALdir/libref
+echo "LIBREF regenerated."

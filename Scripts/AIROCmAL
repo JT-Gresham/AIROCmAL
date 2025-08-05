@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+
+source /etc/AIROCmAL/AIROCmAL_path
+source $AIROCmALdir/AIROCmAL_env/bin/activate
+
+var1=$(echo $1)
+var2=$(echo $2)
+
+case $var1 in
+    install)
+        case $var2 in
+            ComfyUI)
+                $AIROCmALdir/Scripts/AIROCmAL-install-ComfyUI.sh
+            ;;
+            comfyui)
+                $AIROCmALdir/Scripts/AIROCmAL-install-ComfyUI.sh
+            ;;
+            Ollama)
+                $AIROCmALdir/Scripts/AIROCmAL-install-Ollama.sh
+            ;;
+            ollama)
+                $AIROCmALdir/Scripts/AIROCmAL-install-Ollama.sh
+            ;;
+            SwarmUI)
+                $AIROCmALdir/Scripts/AIROCmAL-install-SwarmUI.sh
+            ;;
+            swarmui)
+                $AIROCmALdir/Scripts/AIROCmAL-install-SwarmUI.sh
+            ;;
+            Fooocus)
+                $AIROCmALdir/Scripts/AIROCmAL-install-Fooocus.sh
+            ;;
+            fooocus)
+                $AIROCmALdir/Scripts/AIROCmAL-install-Fooocus.sh
+            ;;
+            RoopUL)
+                $AIROCmALdir/Scripts/AIROCmAL-install-RoopUL.sh
+            ;;
+            roopul)
+                $AIROCmALdir/Scripts/AIROCmAL-install-RoopUL.sh
+            ;;
+            OmniGen)
+                $AIROCmALdir/Scripts/AIROCmAL-install-OmniGen.sh
+            ;;
+            omnigen)
+                $AIROCmALdir/Scripts/AIROCmAL-install-OmniGen.sh
+            ;;
+            CrewAI)
+                $AIROCmALdir/Scripts/AIROCmAL-install-CrewAI.sh
+            ;;
+            crewai)
+                $AIROCmALdir/Scripts/AIROCmAL-install-CrewAI.sh
+            ;;
+            F5-TTS)
+                $AIROCmALdir/Scripts/AIROCmAL-install-F5-TTS.sh
+            ;;
+            f5-tts)
+                $AIROCmALdir/Scripts/AIROCmAL-install-F5-TTS.sh
+            ;;
+            *)
+                echo "You have entered an invalid command. You may install the following:"
+                echo "ComfyUI, Ollama, SwarmUI, OmniGen, Fooocus, RoopUL, CrewAI, F5-TTS"
+            ;;
+        esac
+;;
+    update)
+        case $var2 in
+            AIROCmAL)
+                source $AIROCmALdir/libref
+                AIROCmAL_update
+            ;;
+            aiinaal)
+                source $AIROCmALdir/libref
+                AIROCmAL_update
+            ;;
+            Intel)
+                pip install --upgrade -r $AIROCmALdir/Scripts/intel_requirements.txt
+                #echo "Temporarily disabled due to custom torch build testing..."
+            ;;
+            intel)
+                pip install --upgrade -r $AIROCmALdir/Scripts/intel_requirements.txt
+                #echo "Temporarily disabled due to custom torch build testing..."
+            ;;
+            Torch)
+                pip install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/xpu
+                #echo "Temporarily disabled due to custom torch build testing..."
+            ;;
+            torch)
+                pip install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/xpu
+                #echo "Temporarily disabled due to custom torch build testing..."
+            ;;
+        esac
+;;
+    run)
+        case $var2 in
+            ComfyUI)
+                $AIROCmALdir/ComfyUI/ComfyUI-Start.sh
+            ;;
+            comfyui)
+                $AIROCmALdir/ComfyUI/ComfyUI-Start.sh
+            ;;
+            Ollama)
+                $AIROCmALdir/Ollama/Ollama-Start.sh
+            ;;
+            ollama)
+                $AIROCmALdir/Ollama/Ollama-Start.sh
+            ;;
+            Fooocus)
+                $AIROCmALdir/Fooocus/Fooocus-Start.sh
+            ;;
+            fooocus)
+                $AIROCmALdir/Fooocus/Fooocus-Start.sh
+            ;;
+            RoopUL)
+                $AIROCmALdir/RoopUL/RoopUL-Start.sh
+            ;;
+            roopul)
+                $AIROCmALdir/RoopUL/RoopUL-Start.sh
+            ;;
+            OmniGen)
+                $AIROCmALdir/OmniGen/OmniGen-Start.sh
+            ;;
+            omnigen)
+                $AIROCmALdir/OmniGen/OmniGen-Start.sh
+            ;;
+            CrewAI)
+                $AIROCmALdir/CrewAI/CrewAI-Start.sh
+            ;;
+            crewai)
+                $AIROCmALdir/CrewAI/CrewAI-Start.sh
+            ;;
+            F5-TTS)
+                $AIROCmALdir/F5-TTS/F5-TTS-Start.sh
+            ;;
+            f5-tts)
+                $AIROCmALdir/F5-TTS/F5-TTS-Start.sh
+            ;;
+            *)
+                echo "You have entered an invalid command. You may run the following:"
+                echo "ComfyUI, Ollama, OmniGen, Fooocus, RoopUL, CrewAI, F5-TTS"
+            ;;
+        esac
+;;
+    AIROCmAL_env)
+        Deb4AIROCmAL -q "$3"
+;;
+    AIROCmAL12_env)
+        Deb4AIROCmAL12 -q "$3"
+;;
+esac
+

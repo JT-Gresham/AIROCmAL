@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+source /etc/AIROCmAL/AIROCmAL_path
+aiinaalpkg=MetaSearch
+
+AIROCmAL_update_MetaSearch () {
+  cd $AIROCmALdir/$aiinaalpkg
+  git fetch --all
+  git branch backup-master
+  git reset --hard origin/master
+  git pull
+  rm ./libref-$aiinaalpkg*
+  rm ./requirements_$aiinaalpkg*
+  wget https://raw.githubusercontent.com/JT-Gresham/AIROCmAL/main/MetaSearch/libref-$aiinaalpkg
+  wget https://raw.githubusercontent.com/JT-Gresham/AIROCmAL/main/MetaSearch/user_customize_$aiinaalpkg_example.sh
+  wget https://raw.githubusercontent.com/JT-Gresham/AIROCmAL/main/MetaSearch/requirements_$aiinaalpkg.txt
+  AIROCmAL update Torch
+  pip install -r requirements_$aiinaalpkg.txt
+  AIROCmAL update Intel
+#  if grep -Fxq "import intel_extension_for_pytorch as ipex" launch.py
+#    then
+#      echo "Intel extensions found in launch.py...skipping"
+#    else
+#      sed -i 's|import ssl|import ssl\n\nimport torch\nimport intel_extension_for_pytorch as ipex|g' launch.py
+#  fi
+#  if grep -Fxq "https://download.pytorch.org/whl/cu121" launch.py
+#    then
+#      echo "URL for Intel version of pytorch found in launch.py...skipping"
+#    else
+#      sed -i 's|https://download.pytorch.org/whl/cu121|https://pytorch-extension.intel.com/release-whl/stable/xpu/us/|g' $AIROCmALdir/$aiinaalpkg/launch.py
+#  fi
+#  if grep -Fxq "torch==2.1.0 torchvision==0.16.0" launch.py
+#    then
+#      echo "Intel versions of pytorch-related packages found in launch.py...skipping"
+#    else
+#      sed -i 's|torch==2.1.0 torchvision==0.16.0|torch>=2.3.1 torchvision>=0.18.1 torchaudio>=2.3.1 intel-extension-for-pytorch>=2.3.110+xpu|g' launch.py
+#  fi
+#  if grep -Fxq "torchsde==0.2.6" requirements_versions.txt
+#    then
+#      echo "torchsde version fix found in requirements_versions.txt...skipping"
+#    else
+#      sed -i 's|torchsde==0.2.6|torchsde>=0.2.6|g' requirements_versions.txt
+#  fi
+#  if grep -Fxq "transformers==4.30.2" requirements_versions.txt
+#    then
+#      echo "torchsde version fix found in requirements_versions.txt...skipping"
+#    else
+#      sed -i 's|transformers==4.30.2|transformers>=4.34.0|g' requirements_versions.txt
+#  fi
+#  if grep -Fxq "accelerate==0.21.0" requirements_versions.txt
+#    then
+#      echo "accelerate version fix found in requirements_versions.txt...skipping"
+#    else
+#      sed -i 's|accelerate==0.21.0|accelerate>=0.21.0|g' requirements_versions.txt
+#  fi
+#  if grep -Fxq "scipy==1.9.3" requirements_versions.txt
+#    then
+#      echo "scipy version fix found in requirements_versions.txt...skipping"
+#    else
+#      sed -i 's|scipy==1.9.3|scipy>=1.9.3|g' requirements_versions.txt
+#  fi
+#rm -R "$AIROCmALdir/$aiinaalpkg/models/checkpoints"
+#rm -R "$AIROCmALdir/$aiinaalpkg/models/loras"
+#rm -R "$AIROCmALdir/$aiinaalpkg/wildcards"
+#rm -R "$AIROCmALdir/$aiinaalpkg/sdxl_styles"
+#rm -R "$AIROCmALdir/$aiinaalpkg/models/vae"
+#rm -R "$AIROCmALdir/$aiinaalpkg/models/vae_approx"
+#rm -R "$AIROCmALdir/$aiinaalpkg/outputs"
+#ln -sf "$AIROCmALdir/shared/checkpoints/t2i" "$AIROCmALdir/$aiinaalpkg/models/checkpoints"
+#ln -sf "$AIROCmALdir/shared/loras/t2i" "$AIROCmALdir/$aiinaalpkg/models/loras"
+#ln -sf "$AIROCmALdir/shared/wildcards/$aiinaalpkg" "$AIROCmALdir/$aiinaalpkg/wildcards"
+#ln -sf "$AIROCmALdir/shared/sdxl_styles/$aiinaalpkg" "$AIROCmALdir/$aiinaalpkg/sdxl_styles"
+#ln -sf "$AIROCmALdir/shared/VAEs/t2i/vae/" "$AIROCmALdir/$aiinaalpkg/models/vae"
+#ln -sf "$AIROCmALdir/shared/VAEs/t2i/vae_approx/" "$AIROCmALdir/$aiinaalpkg/models/vae_approx"
+#ln -sf "$AIROCmALdir/shared/output/" "$AIROCmALdir/$aiinaalpkg/outputs"
+cd $pdirectory
+$AIROCmALdir/$aiinaalpkg/user_customize_$aiinaalpkg.sh
+cd $AIROCmALdir/$aiinaalpkg
+}
+
+MetaSearch-exit () {
+    kill $(pidof python $AIROCmALdir/$aiinaalpkg)
+}

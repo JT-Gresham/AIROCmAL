@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+source /etc/AIROCmAL/AIROCmAL_path
+aiinaalpkg=Auto1111
+
+AIROCmAL_update_Auto1111 () {
+  cd $AIROCmALdir/$aiinaalpkg
+  git fetch --all
+  git branch backup-master
+  git reset --hard origin/master
+  git pull
+  rm ./libref-$aiinaalpkg*
+  rm ./requirements_$aiinaalpkg*
+  wget https://raw.githubusercontent.com/JT-Gresham/AIROCmAL/main/Auto1111/libref-$aiinaalpkg
+  wget https://raw.githubusercontent.com/JT-Gresham/AIROCmAL/main/Auto1111/user_customize_$aiinaalpkg_example.sh
+  wget https://raw.githubusercontent.com/JT-Gresham/AIROCmAL/main/Auto1111/requirements_$aiinaalpkg.txt
+  AIROCmAL update Torch
+  pip install -r requirements_$aiinaalpkg.txt
+  AIROCmAL update Intel
+  pip install --force-reinstall --no-deps 'https://github.com/bitsandbytes-foundation/bitsandbytes/releases/download/continuous-release_multi-backend-refactor/bitsandbytes-0.44.1.dev0-py3-none-manylinux_2_24_x86_64.whl'
+  if grep -Fxq "import intel_extension_for_pytorch as ipex" launch.py
+    then
+      echo "Intel extensions found in launch.py...skipping"
+    else
+      sed -i 's|from modules import launch_utils|import intel_extension_for_pytorch as ipex\nimport intel_extension_for_transformers\nfrom modules import launch_utils\n|g' launch.py
+  fi
+
+rm -R "$AIROCmALdir/$aiinaalpkg/models/Stable-diffusion"
+rm -R "$AIROCmALdir/$aiinaalpkg/models/Lora"
+#rm -R "$AIROCmALdir/$aiinaalpkg/models/clip_vision"
+#rm -R "$AIROCmALdir/$aiinaalpkg/models/controlnet"
+#rm -R "$AIROCmALdir/$aiinaalpkg/wildcards"
+#rm -R "$AIROCmALdir/$aiinaalpkg/sdxl_styles"
+rm -R "$AIROCmALdir/$aiinaalpkg/models/prompt_expansion"
+rm -R "$AIROCmALdir/$aiinaalpkg/models/VAE"
+rm -R "$AIROCmALdir/$aiinaalpkg/models/VAE-approx"
+rm -R "$AIROCmALdir/$aiinaalpkg/outputs"
+ln -sf "$AIROCmALdir/shared/checkpoints/t2i" "$AIROCmALdir/$aiinaalpkg/models/Stable-diffusion"
+ln -sf "$AIROCmALdir/shared/loras/t2i" "$AIROCmALdir/$aiinaalpkg/models/Lora"
+#ln -sf "$AIROCmALdir/shared/clip_vision" "$AIROCmALdir/$aiinaalpkg/models/clip_vision"
+#ln -sf "$AIROCmALdir/shared/controlnet" "$AIROCmALdir/$aiinaalpkg/models/controlnet"
+#ln -sf "$AIROCmALdir/shared/wildcards/" "$AIROCmALdir/$aiinaalpkg/wildcards"
+#ln -sf "$AIROCmALdir/shared/sdxl_styles/$aiinaalpkg" "$AIROCmALdir/$aiinaalpkg/sdxl_styles"
+ln -sf "$AIROCmALdir/shared/VAEs/t2i/prompt_expansion/" "$AIROCmALdir/$aiinaalpkg/models/prompt_expansion"
+ln -sf "$AIROCmALdir/shared/VAEs/t2i/vae/" "$AIROCmALdir/$aiinaalpkg/models/VAE"
+ln -sf "$AIROCmALdir/shared/VAEs/t2i/vae_approx/" "$AIROCmALdir/$aiinaalpkg/models/VAE-approx"
+ln -sf "$AIROCmALdir/shared/output/Auto1111/" "$AIROCmALdir/$aiinaalpkg/outputs"
+cd $pdirectory
+$AIROCmALdir/$aiinaalpkg/user_customize_$aiinaalpkg.sh
+cd $AIROCmALdir/$aiinaalpkg
+}
+
+Auto1111-exit () {
+    kill $(pidof python $AIROCmALdir/$aiinaalpkg)
+}
